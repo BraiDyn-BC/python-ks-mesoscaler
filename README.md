@@ -1,2 +1,3 @@
-# ks-python-mesoscaler
+# python-mesoscaler
+
 MesoNet algorithms made modular.

@@ -1,0 +1,23 @@
+ID,StructureID,Description
+OB,507,Main olfactory bulb
+MOs,993,Secondary motor area
+MOp,985,Primary motor area
+SSp_m,345,"Primary somatosensory area, mouth"
+SSp_ul,369,"Primary somatosensory area, upper limb"
+SSp_ll,337,"Primary somatosensory area, lower limb"
+SSp_n,353,"Primary somatosensory area, nose"
+SSp_un,182305689,"Primary somatosensory area, unassigned"
+SSp_tr,361,"Primary somatosensory area, trunk"
+SSp_bfd,329,"Primary somatosensory area, barrel field"
+SSs,378,Supplemental somatosensory area
+VISa,312782546,"Posterior parietal association areas, anterior area"
+VISrl,417,"Posterior parietal association areas, rostrolateral visual area"
+VISal,402,Anterolateral visual area
+AUDs,247,Secondary auditory areas (part of auditory areas)
+AUDp,1002,Primary auditory area
+VISl,409,Lateral visual area
+VISp,385,Primary visual area
+VISpm,533,Posteromedial visual area
+VISam,394,Anteromedial visual area
+RSPagl,894,"Retrosplenial area, lateral agranular part"
+RSPd,879,"Retrosplenial area, dorsal part"
