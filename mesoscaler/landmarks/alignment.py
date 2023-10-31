@@ -31,11 +31,11 @@ from ..typing import (
 )
 from .. import (
     defaults as _defaults,
-    misc as _misc,
 )
 from . import (
     reference as _refs,
     base as _base,
+    affine as _affine,
 )
 
 
@@ -85,7 +85,7 @@ def align_dlc_landmarks(
     target: Union[_base.DLCOutput, _base.Landmarks, Iterable[_base.Landmarks]],
     reference: Optional[_base.Landmarks],
     likelihood_threshold: Optional[Number] = None,
-    separate_sides: bool = True
+    separate_sides: Optional[bool] = False
 ) -> Tuple[_base.Alignment]:
     """takes `Landmark` objects, and try to estimate the Affine warp matrix
     that warps `reference` landmarks to `target` landmarks.
@@ -149,7 +149,7 @@ def validate_landmarks(
 
 def estimate_warp_matrix(
     validated_pair: Pairing,
-    separate_sides: bool = True
+    separate_sides: Optional[bool] = None
 ) -> _base.Alignment:
     """takes a `Pairing` object and estimates the Affine warp matrix (matrices)
     corresponding to the reference-target pairs of landmarks.
@@ -160,14 +160,16 @@ def estimate_warp_matrix(
     Internally uses the `estimate_affine` function.
     """
     def _align(pair: Pairing) -> _npt.NDArray:
-        return _misc.estimate_affine(
+        return _affine.estimate(
             pair.reference.xy,
             pair.target.xy
         )
 
     left: Pairing = validated_pair.left
     right: Pairing = validated_pair.right
-    separate_sides = (len(left.without_middle) > 2) and (len(right.without_middle) > 2)
+
+    if separate_sides is None:
+        separate_sides = (len(left.without_middle) > 2) and (len(right.without_middle) > 2)
 
     if separate_sides is True:
         return _base.Alignment(

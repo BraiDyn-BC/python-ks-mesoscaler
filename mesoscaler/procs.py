@@ -31,7 +31,7 @@ from . import (
     images as _images,
     landmarks as _landmarks,
     rois as _rois,
-    misc as _misc,
+    fileutils as _fileutils,
 )
 from .typing import (
     PathLike,
@@ -55,7 +55,7 @@ def run_image_collection(
 
     paths  = _images.collect_image_files(input_dir, suffixes=suffixes)
     images = _images.load_images(paths)
-    image_names = _misc.unique_names_from_path(paths)
+    image_names = _fileutils.unique_names_from_path(paths)
 
     video_path = _images.collected_images_video_path(output_dir)
     table_path = _images.collected_images_metadata_path(output_dir)
@@ -100,7 +100,7 @@ def run_landmark_alignment(
     input_dir: PathLike,
     output_dir: PathLike,
     likelihood_threshold: Optional[float] = None,
-    separate_sides: bool = True,
+    separate_sides: Optional[bool] = None,
     video_fps: Optional[Number] = None
 ) -> Path:
     """loads the results of DeepLabCut inference from ``input_dir``, and
@@ -165,9 +165,9 @@ def run_rois_generation(
         if roiset.total_frames == 1:
             outbase = roiset.image_name
         else:
-            digits = _misc.required_number_of_digits(roiset.total_frames)
+            digits = _fileutils.required_number_of_digits(roiset.total_frames)
             outbase = f"{Path(roiset.image_name).stem}_frame{str(roiset.frame_idx).zfill(digits)}"
-        suffix = _misc.get_roi_file_suffix(file_type)
+        suffix = _fileutils.get_roi_file_suffix(file_type)
         outfile = output_dir / f"{outbase}{suffix}"
         if not output_dir.exists():
             output_dir.mkdir(parents=True)

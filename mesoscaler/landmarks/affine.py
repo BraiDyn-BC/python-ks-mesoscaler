@@ -19,54 +19,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from typing import Optional, Iterable, Tuple
-from pathlib import Path
-import math as _math
+"""functions related to Affine transform."""
+from typing import Optional, Tuple
 
 import numpy as _np
 import numpy.typing as _npt
 import cv2 as _cv2
 
-from . import (
+from .. import (
     defaults as _defaults,
 )
-from .typing import (
-    ROIFileType,
-)
 
 
-def unique_names_from_path(paths: Iterable[Path]) -> Tuple[str]:
-    NUM_MAX_TEST = 10
-
-    def with_level(i):
-        return [str(path.relative_to(path.parents[i])) for path in paths]
-
-    def is_unique(names):
-        return len(set(names)) == len(names)
-
-    for i in range(NUM_MAX_TEST):
-        names = with_level(i)
-        if is_unique(names):
-            return tuple(names)
-    raise RuntimeError('failed to find unique names from a set of paths')
-
-
-def required_number_of_digits(total: int, minimum: int = 2) -> int:
-    required = _math.floor(_math.log10(total)) + 1
-    return max(required, minimum)
-
-
-def get_roi_file_suffix(filetype: ROIFileType) -> str:
-    if filetype == 'hdf':
-        return '.h5'
-    elif filetype == 'matlab':
-        return '.mat'
-    else:
-        raise ValueError(f"ROI file type expected to be one of ('hdf', 'matlab'), got {repr(filetype)}")
-
-
-def estimate_affine(
+def estimate(
     src: _npt.NDArray,
     dst: _npt.NDArray
 ) -> _npt.NDArray:
@@ -86,7 +51,11 @@ def estimate_affine(
     return a.reshape((2, 3), order='C')
 
 
-def affine_warp_image(
+def invert(M: _npt.NDArray) -> _npt.NDArray:
+    return _cv2.invertAffineTransform(M)
+
+
+def warp_image(
     img: _npt.NDArray,
     warp: _npt.NDArray,
     size: Optional[Tuple[int]] = None
@@ -97,7 +66,7 @@ def affine_warp_image(
     return _cv2.warpAffine(img, warp, dsize=size)
 
 
-def affine_warp_points(
+def warp_points(
     pts: _npt.NDArray,
     warp: _npt.NDArray
 ) -> _npt.NDArray:

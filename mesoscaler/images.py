@@ -30,12 +30,14 @@ import imageio as _iio
 import pandas as _pd
 import cv2 as _cv2
 
-from . import defaults as _defaults
+from . import (
+    defaults as _defaults,
+    fileutils as _fileutils,
+)
 from .typing import PathLike, Suffixes, Number
-from mesonet.utils import natural_sort_key as _natural_sort_key  # FIXME
 
 
-InputImageFiles = Tuple[Path]
+InputImageFiles = Iterable[PathLike]
 
 
 @dataclasses.dataclass
@@ -108,7 +110,7 @@ def collect_image_files(input_dir: PathLike, suffixes: Optional[Suffixes] = None
     for suffix in suffixes:
         for child in input_dir.glob(f'*{suffix}'):
             files.append(child)
-    return tuple(sorted(files, key=lambda file: _natural_sort_key(str(file))))
+    return tuple(sorted(files, key=lambda file: _fileutils.index_name(str(file))))
 
 
 def load_images(
@@ -146,7 +148,7 @@ def load_images(
     pages  = []
     images = []
     for srcpath in input_files:
-        img, num = load_single(srcpath)
+        img, num = load_single(Path(srcpath))
         images.append(img)
         pages.append(num)
     return InputImages(pages=tuple(pages), images=tuple(images))

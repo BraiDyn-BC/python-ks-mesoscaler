@@ -42,12 +42,12 @@ from ..typing import (
     Hemisphere,
 )
 from .. import (
-    misc as _misc,
     defaults as _defaults,
 )
 from . import (
     reference as _refs,
     paths as _paths,
+    affine as _affine,
 )
 
 @_dataclasses.dataclass
@@ -179,7 +179,7 @@ class Landmarks:
         if len(self) == 0:
             return self
         coords = self.coords.copy()
-        coords[:, :2] = _misc.affine_warp_points(self.coords[:, :2], warp)
+        coords[:, :2] = _affine.warp_points(self.coords[:, :2], warp)
         return self.__class__(
             names=self.names,
             coords=coords
@@ -247,6 +247,20 @@ class Alignment:
     # the right hemispheres were estimated separately
 
     Self = 'Alignment'
+
+    def invert(self) -> Self:
+        """returns the inverse warp matrices.
+        currently, this method is only supported for Alignment objects
+        with `separate = False`"""
+        if self.separate != False:
+            raise ValueError('inverting separate-hemispheres alignment is not supported' 
+                             'use `separate_sides=True` when performing alignment')
+        inv = _affine.invert(self.left)
+        return self.__class__(
+            left=inv,
+            right=inv,
+            separate=False
+        )
 
     def warp_points(self, landmarks: Landmarks) -> Landmarks:
         left: Landmarks   = landmarks.left.without_middle

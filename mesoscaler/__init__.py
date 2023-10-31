@@ -26,6 +26,8 @@ from . import (  # noqa: F401
     atlas,
     procs,
     rois,
+    defaults,
+    typing,
 )
 
 # image-related classes and procedures
