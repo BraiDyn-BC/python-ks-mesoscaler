@@ -223,7 +223,7 @@ def generate_rois_single(
         side='both',
         AllenID=-1,
         description='the expected outline of the brain for this ROI set',
-        mask=_np.logical_or(warped_outlines[0].mask, warped_outlines[1].mask)
+        mask=(warped_outlines[0].mask.astype(_np.uint8) + warped_outlines[1].mask.astype(_np.uint8))
     )
     return ROISet(
         image_name=metadata['Image'],

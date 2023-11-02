@@ -163,7 +163,7 @@ def run_rois_generation(
         resize=True
     ):
         if roiset.total_frames == 1:
-            outbase = roiset.image_name
+            outbase = Path(roiset.image_name).stem
         else:
             digits = _fileutils.required_number_of_digits(roiset.total_frames)
             outbase = f"{Path(roiset.image_name).stem}_frame{str(roiset.frame_idx).zfill(digits)}"
