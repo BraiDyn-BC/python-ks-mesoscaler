@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from pathlib import Path
-from typing import Dict, Tuple, Union, Optional, Any
+from typing import Dict, Tuple, Union, Optional, Any, Self
 from dataclasses import dataclass
 import json as _json
 
@@ -57,6 +57,33 @@ class ROI:
     AllenID: int
     description: str
     mask: _npt.NDArray
+
+    @property
+    def image_width(self) -> int:
+        return self.image_shape[1]
+    
+    @property
+    def image_height(self) -> int:
+        return self.image_shape[0]
+    
+    @property
+    def image_shape(self) -> Tuple[int, int]:
+        return self.mask.shape
+
+    @classmethod
+    def load_hdf(cls, entry: _h5.Dataset) -> Self:
+        name = entry.attrs['name']
+        side = entry.attrs['side']
+        allenID = entry.attrs.get('AllenID', 0)
+        desc = entry.attrs['description']
+        mask = _np.array(entry, copy=False).astype(bool)
+        return cls(
+            name=name,
+            side=side,
+            AllenID=allenID,
+            description=desc,
+            mask=mask
+        )
 
     def _write_hdf(
         self,
@@ -120,12 +147,45 @@ class ROISet:
             if roi.name not in names:
                 names.append(roi.name)
         return tuple(names)
+    
+    @property
+    def image_shape(self) -> Tuple[int, int]:
+        return self.rois[0].image_shape
+    
+    @property
+    def image_width(self) -> int:
+        return self.image_shape[1]
+    
+    @property
+    def image_height(self) -> int:
+        return self.image_shape[0]
+    
+    @classmethod
+    def load_hdf(cls, path: PathLike) -> Self:
+        with _h5.File(str(path), 'r') as src:
+            image_name   = src.attrs['image_name']
+            frame_idx    = src.attrs['frame_idx']
+            total_frames = src.attrs['total_frames']
+
+            rois_src = src['rois']
+            roi_names = _json.loads(rois_src.attrs['names'])
+            rois = []
+            for name in roi_names:
+                rois.append(ROI.load_hdf(rois_src[name]))
+
+        return cls(
+            image_name=image_name,
+            frame_idx=frame_idx,
+            total_frames=total_frames,
+            rois=tuple(rois)
+        )
 
     def to_hdf(self, path: PathLike, **options):
         """`options` can be used to pass to `create_dataset`"""
         with _h5.File(str(path), 'w') as out:
-            out.attrs['image_name'] = self.image_name
-            out.attrs['frame_idx']  = self.frame_idx
+            out.attrs['image_name']   = self.image_name
+            out.attrs['frame_idx']    = self.frame_idx
+            out.attrs['total_frames'] = self.total_frames
 
             rois = out.create_group('rois')
             rois.attrs['names']  = _json.dumps(self.names, indent=None)
@@ -153,6 +213,35 @@ class ROISet:
             self.to_matfile(path)
         else:
             raise ValueError(f"ROI file type expected to be one of ('hdf', 'matlab'), but got {repr(filetype)}")
+    
+    def data_dict(self) -> Dict[str, Union[Dict[str, _npt.NDArray], _npt.NDArray]]:
+        ret = dict()
+        for roi in self.rois:
+            if roi.side in ('left', 'right'):
+                if roi.side not in ret.keys():
+                    ret[roi.side] = dict()
+                ret[roi.side][roi.name] = roi.mask.astype(_np.uint8)
+            elif roi.side == 'both':
+                ret[roi.name] = roi.mask.astype(_np.uint8)
+            else:
+                raise ValueError(f"unexpected hemisphere spec: {repr(roi.side)}")
+        return ret
+    
+    def metadata_dict(self) -> Dict[str, Any]:
+        ret = {
+            'image_name': self.image_name,
+            'frame_idx': self.frame_idx,
+            'image_size': self.image_shape,
+            'rois': dict(),
+        }
+        for roi in self.rois:
+            if roi.name not in ret['rois']:
+                ret['rois'][roi.name] = {
+                    'name': roi.name,
+                    'AllenID': roi.AllenID,
+                    'description': roi.description
+                }
+        return ret
 
 
 def generate_rois_batch(

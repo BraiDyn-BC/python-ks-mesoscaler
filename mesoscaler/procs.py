@@ -25,7 +25,9 @@
 from pathlib import Path
 from typing import Optional, Tuple
 
+import scipy.io as _sio
 import pandas as _pd
+import imageio.v3 as _iio
 
 from . import (
     images as _images,
@@ -143,7 +145,8 @@ def run_rois_generation(
     metadata_dir: PathLike,
     alignment_dir: PathLike,
     output_dir: PathLike,
-    file_type: ROIFileType
+    file_type: ROIFileType,
+    resize: bool = True
 ) -> Path:
     metadata_dir = Path(metadata_dir)
     alignment_dir = Path(alignment_dir)
@@ -160,7 +163,7 @@ def run_rois_generation(
         metadata=metadata,
         reference=_rois.load_reference_ROIs(),
         outline=_rois.load_reference_outlines(),
-        resize=True
+        resize=resize
     ):
         if roiset.total_frames == 1:
             outbase = Path(roiset.image_name).stem
@@ -172,4 +175,81 @@ def run_rois_generation(
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
         roiset.to_file(outfile, file_type)
+    return output_dir
+
+def run_packaging_to_matfile(
+    metadata_dir: PathLike,
+    landmarks_dir: PathLike,
+    alignment_dir: PathLike,
+    rois_dir: PathLike,
+    output_dir: PathLike
+) -> Path:
+    # TODO:
+    #
+    # may need to determine the strategy
+    # of what image sizes to be used
+    # (i.e. in 512 x 512, or the source frame size)
+    #
+    # the landmarks / alignment coordinates
+    # may need to be converted accordingly...
+    #
+
+    metadata_dir = Path(metadata_dir)
+    landmarks_dir = Path(landmarks_dir)
+    alignment_dir = Path(alignment_dir)
+    rois_dir = Path(rois_dir)
+    output_dir = Path(output_dir)
+
+    # load: resized-images, metadata, landmarks, alignment
+    metadata_table_path = _images.collected_images_metadata_path(metadata_dir)
+    collected_images_path = _images.collected_images_video_path(metadata_dir)
+    alignment_table_path = _landmarks.alignment_table_path(alignment_dir)
+    dlcoutput = _landmarks.DLCOutput.from_directory(landmarks_dir)
+
+    metadata  = _images.load_metadata_table(metadata_table_path)
+    images    = _iio.imread(str(collected_images_path))
+    landmarks = _landmarks.landmarks_from_dlc_output(dlcoutput)
+    alignment = _landmarks.load_alignment_table(alignment_table_path)
+
+    # for each source frame:
+    # 1. find roi HDF5 file and read ROIs from it
+    # 2. create the dict object containing:
+    #    - landmarks (in 512 x 512),
+    #    - reference-to-data alignment (in 512 x 512)
+    #    - rois (in the size registered in the ROIs file)
+    def _get_roifile(row: _pd.Series) -> Tuple[str, Path]:
+        name = Path(row.Image).stem
+        if row.TotalFrames == 1:
+            roibase = name
+        else:
+            digits = _fileutils.required_number_of_digits(row.TotalFrames)
+            roibase = f"{name}_frame{str(row.Frame).zfill(digits)}"
+        return name, (rois_dir / f"{roibase}.h5")
+
+    for idx, row in metadata.iterrows():
+        basename, roifile = _get_roifile(row)
+        frame_landmarks: _landmarks.Landmarks = landmarks[idx]
+        frame_alignment: _landmarks.Alignment = alignment[idx]
+        frame_roiset: _rois.ROISet = _rois.ROISet.load_hdf(roifile)
+        frame_image = images[idx]
+
+        data = dict()
+        data['metadata'] = frame_roiset.metadata_dict()
+        data['image512'] = frame_image
+        data['landmarks512'] = frame_landmarks.to_dict()
+        if frame_alignment.separate:
+            data['affine_ref_to_data512'] = {
+                'left': frame_alignment.left,
+                'right': frame_alignment.right
+            }
+        else:
+            data['affine_ref_to_data512'] = frame_alignment.left
+        data['rois'] = frame_roiset.data_dict()
+
+        outpath = output_dir / f"{basename}.mat"
+        _sio.savemat(
+            str(outpath),
+            data
+        )
+    
     return output_dir

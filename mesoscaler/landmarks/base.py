@@ -23,7 +23,7 @@
 # flake8: noqa: E712
 
 from pathlib import Path
-from typing import Optional, Union, Tuple, Iterable, Dict
+from typing import Optional, Union, Tuple, Iterable, Dict, Any, Self
 import dataclasses as _dataclasses
 
 import numpy as _np
@@ -54,8 +54,6 @@ from . import (
 class DLCOutput:
     table: _pd.DataFrame
     images: _npt.NDArray
-
-    Self = 'DLCOutput'
 
     @property
     def size(self) -> int:
@@ -101,14 +99,20 @@ class Landmark:
     
     def is_valid(self) -> bool:
         return all(x for x in ~_np.isnan(self.coords.ravel()[:2]))
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'name': self.name,
+            'x': self.x,
+            'y': self.y,
+            'likelihood': self.p,
+        }
 
 
 @_dataclasses.dataclass
 class Landmarks:
     names: Tuple[str]
     coords: _npt.NDArray
-
-    Self = 'Landmarks'
 
     @property
     def x(self) -> _npt.NDArray:
@@ -232,6 +236,21 @@ class Landmarks:
             names=tuple(item.name for item in landmarks),
             coords=_np.stack([item.coords for item in landmarks], axis=0)
         )
+    
+    def to_dict(self) -> Dict[str, Dict[str, float]]:
+        ret = dict()
+        for idx, name in enumerate(self.names):
+            # NOTE:
+            # unlike `Landmark.to_dict()`, this method
+            # will not contain the ROI name inside
+            # the dictionary corresponding to each ROI
+            #
+            ret[name] = {
+                'x': self.coords[idx, 0],
+                'y': self.coords[idx, 1],
+                'likelihood': self.coords[idx, 2]
+            }
+        return ret
 
 
 @_dataclasses.dataclass
@@ -245,8 +264,6 @@ class Alignment:
     separate: bool = True
     # indication of whether the left and
     # the right hemispheres were estimated separately
-
-    Self = 'Alignment'
 
     def invert(self) -> Self:
         """returns the inverse warp matrices.
