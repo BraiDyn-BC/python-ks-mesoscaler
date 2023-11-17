@@ -20,24 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""components for project-based pipeline management."""
+import warnings as _warnings
 
-from typing import List, Optional
-import dataclasses as _dataclasses
-
-from .typing import (
-    PathLike,
-)
-
-
-class Procedure:
-    pass  # FIXME
-
-
-@_dataclasses.dataclass
-class Project:
-    project_dir: PathLike
-    input_dir: Optional[PathLike] = None
-    procedures: List[Procedure]
-
-    VERSION = '1.0'
+with _warnings.catch_warnings():
+    _warnings.simplefilter('ignore', category=UserWarning)
+    import h5py

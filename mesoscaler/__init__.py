@@ -26,8 +26,10 @@ from . import (  # noqa: F401
     atlas,
     procs,
     rois,
+    packaging,
     defaults,
     typing,
+    commands,
 )
 
 # image-related classes and procedures
@@ -51,6 +53,9 @@ Atlas = atlas.Atlas
 ROISet = rois.ROISet
 generate_rois_batch  = rois.generate_rois_batch
 generate_rois_single = rois.generate_rois_single
+
+# packaging-related classes
+Results = packaging.Results
 
 # procedures
 run_image_collection    = procs.run_image_collection

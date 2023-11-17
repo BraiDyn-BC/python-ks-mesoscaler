@@ -23,9 +23,8 @@
 """the procedures that correspond to the individual steps of the pipeline."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
-import scipy.io as _sio
 import pandas as _pd
 import imageio.v3 as _iio
 
@@ -33,29 +32,34 @@ from . import (
     images as _images,
     landmarks as _landmarks,
     rois as _rois,
+    packaging as _packaging,
     fileutils as _fileutils,
 )
 from .typing import (
     PathLike,
-    Suffixes,
+    InputImageFiles,
     Number,
-    ROIFileType,
+    Suffixes,
+    ResultsFileType,
 )
 
 
 def run_image_collection(
-    input_dir: PathLike,
+    input_dir_or_files: Union[PathLike, InputImageFiles],
     output_dir: PathLike,
     suffixes: Optional[Suffixes] = None,
     video_fps: Optional[Number] = None
 ) -> Path:
-    """collect images from ``input_dir``, and stores the followings
+    """collect images from ``input_dir_or_files``, and stores the followings
     in ``output_dir``. creates the directory if not existent.
     returns the output directory as a ``Path``."""
-    input_dir = Path(input_dir)
     output_dir = Path(output_dir)
+    if isinstance(input_dir_or_files, (str, Path)):
+        input_dir = Path(input_dir_or_files)
+        paths  = _images.collect_image_files(input_dir, suffixes=suffixes)
+    else:
+        paths = tuple(Path(path) for path in input_dir_or_files)
 
-    paths  = _images.collect_image_files(input_dir, suffixes=suffixes)
     images = _images.load_images(paths)
     image_names = _fileutils.unique_names_from_path(paths)
 
@@ -145,7 +149,7 @@ def run_rois_generation(
     metadata_dir: PathLike,
     alignment_dir: PathLike,
     output_dir: PathLike,
-    file_type: ROIFileType,
+    file_type: ResultsFileType,
     resize: bool = True
 ) -> Path:
     metadata_dir = Path(metadata_dir)
@@ -177,12 +181,14 @@ def run_rois_generation(
         roiset.to_file(outfile, file_type)
     return output_dir
 
-def run_packaging_to_matfile(
+
+def run_packaging_all_results(
     metadata_dir: PathLike,
     landmarks_dir: PathLike,
     alignment_dir: PathLike,
     rois_dir: PathLike,
-    output_dir: PathLike
+    output_dir: PathLike,
+    filetype: ResultsFileType
 ) -> Path:
     # TODO:
     #
@@ -200,16 +206,27 @@ def run_packaging_to_matfile(
     rois_dir = Path(rois_dir)
     output_dir = Path(output_dir)
 
+    if filetype == 'hdf':
+        _write_to_file = _packaging.package_hdf
+    elif filetype == 'matlab':
+        _write_to_file = _packaging.package_matfile
+    else:
+        raise ValueError(f"unexpected file type: '{filetype}'")
+
     # load: resized-images, metadata, landmarks, alignment
     metadata_table_path = _images.collected_images_metadata_path(metadata_dir)
-    collected_images_path = _images.collected_images_video_path(metadata_dir)
     alignment_table_path = _landmarks.alignment_table_path(alignment_dir)
     dlcoutput = _landmarks.DLCOutput.from_directory(landmarks_dir)
+    collected_images_path = _images.collected_images_video_path(metadata_dir)
+    landmarks_video_path  = _landmarks.predicted_landmarks_video_path(landmarks_dir)
+    alignment_video_path  = _landmarks.aligned_landmarks_video_path(alignment_dir)
 
     metadata  = _images.load_metadata_table(metadata_table_path)
-    images    = _iio.imread(str(collected_images_path))
     landmarks = _landmarks.landmarks_from_dlc_output(dlcoutput)
     alignment = _landmarks.load_alignment_table(alignment_table_path)
+    source_images    = _iio.imread(str(collected_images_path))
+    landmarks_images = _iio.imread(str(landmarks_video_path))
+    alignment_images = _iio.imread(str(alignment_video_path))
 
     # for each source frame:
     # 1. find roi HDF5 file and read ROIs from it
@@ -218,7 +235,7 @@ def run_packaging_to_matfile(
     #    - reference-to-data alignment (in 512 x 512)
     #    - rois (in the size registered in the ROIs file)
     def _get_roifile(row: _pd.Series) -> Tuple[str, Path]:
-        name = Path(row.Image).stem
+        name = str(Path(row.Image).with_suffix(''))
         if row.TotalFrames == 1:
             roibase = name
         else:
@@ -228,28 +245,16 @@ def run_packaging_to_matfile(
 
     for idx, row in metadata.iterrows():
         basename, roifile = _get_roifile(row)
-        frame_landmarks: _landmarks.Landmarks = landmarks[idx]
-        frame_alignment: _landmarks.Alignment = alignment[idx]
-        frame_roiset: _rois.ROISet = _rois.ROISet.load_hdf(roifile)
-        frame_image = images[idx]
-
-        data = dict()
-        data['metadata'] = frame_roiset.metadata_dict()
-        data['image512'] = frame_image
-        data['landmarks512'] = frame_landmarks.to_dict()
-        if frame_alignment.separate:
-            data['affine_ref_to_data512'] = {
-                'left': frame_alignment.left,
-                'right': frame_alignment.right
-            }
-        else:
-            data['affine_ref_to_data512'] = frame_alignment.left
-        data['rois'] = frame_roiset.data_dict()
-
-        outpath = output_dir / f"{basename}.mat"
-        _sio.savemat(
-            str(outpath),
-            data
+        results = _packaging.Results(
+            name=basename,
+            images=_packaging.ResultImages(
+                source=source_images[idx],
+                landmarks=landmarks_images[idx],
+                alignment=alignment_images[idx]
+            ),
+            landmarks=landmarks[idx],
+            alignment=alignment[idx],
+            rois=_rois.ROISet.load_hdf(roifile),
+            datatype='512'  # NOTE: assumes 512x512 for the time being
         )
-    
-    return output_dir
+        _write_to_file(results, output_dir=output_dir)

@@ -20,18 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-IMAGE_SUFFIXES = ('.png', '.tif', '.tiff')
-VIDEO_FRAME_SIZE = (512, 512)
-VIDEO_FRAME_RATE = 1
+from argparse import ArgumentParser as _Parser
 
-COLLECTED_IMAGES_VIDEO_NAME = "images.mp4"
-COLLECTED_IMAGES_METADATA_NAME = "metadata.csv"
 
-PREDICTED_LANDMARKS_VIDEO_NAME = "images_with_landmarks.mp4"
-PREDICTED_LANDMARKS_TABLE_NAME = "landmarks.csv"
-LANDMARK_LIKELIHOOD_THRESHOLD  = 0.9999
-ALIGNMENT_TABLE_NAME           = "reference_to_images_transform.csv"
-ALIGNED_LANDMARKS_VIDEO_NAME   = "images_with_aligned_landmarks.mp4"
-ALIGNED_LANDMARKS_TABLE_NAME   = "aligned_landmarks.csv"
-
-PACKAGE_FILE_TYPE = 'hdf'
+parser = _Parser(
+    'mesoscaler',
+    description='aligns reference atlas to a set of images.'
+)
+commands = parser.add_subparsers()

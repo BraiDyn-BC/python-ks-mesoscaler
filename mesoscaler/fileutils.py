@@ -26,7 +26,7 @@ import math as _math
 import re as _re
 
 from .typing import (
-    ROIFileType,
+    ResultsFileType,
 )
 
 
@@ -57,7 +57,7 @@ def required_number_of_digits(total: int, minimum: int = 2) -> int:
     return max(required, minimum)
 
 
-def get_roi_file_suffix(filetype: ROIFileType) -> str:
+def get_roi_file_suffix(filetype: ResultsFileType) -> str:
     if filetype == 'hdf':
         return '.h5'
     elif filetype == 'matlab':

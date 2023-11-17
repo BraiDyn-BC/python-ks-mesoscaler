@@ -34,10 +34,7 @@ from . import (
     defaults as _defaults,
     fileutils as _fileutils,
 )
-from .typing import PathLike, Suffixes, Number
-
-
-InputImageFiles = Iterable[PathLike]
+from .typing import PathLike, Suffixes, Number, InputImageFiles
 
 
 @dataclasses.dataclass

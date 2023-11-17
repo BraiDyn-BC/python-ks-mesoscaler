@@ -20,22 +20,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from pathlib import Path
-from typing import Dict, Tuple, Union, Optional, Any, Self
+from typing import Dict, Tuple, Union, Optional, Any
+from typing_extensions import Self
 from dataclasses import dataclass
 import json as _json
+import warnings as _warnings
 
 import numpy as _np
 import numpy.typing as _npt
 import scipy.io as _sio
 import pandas as _pd
-import h5py as _h5
 import imageio.v3 as _iio
 import cv2 as _cv2
 
 from .typing import (
     PathLike,
     Hemisphere,
-    ROIFileType,
+    ResultsFileType,
+)
+from .libwrapper import (
+    h5py as _h5
 )
 from . import (
     landmarks as _landmarks,
@@ -167,12 +171,15 @@ class ROISet:
             frame_idx    = src.attrs['frame_idx']
             total_frames = src.attrs['total_frames']
 
-            rois_src = src['rois']
-            roi_names = _json.loads(rois_src.attrs['names'])
             rois = []
-            for name in roi_names:
-                rois.append(ROI.load_hdf(rois_src[name]))
-
+            roi_names = _json.loads(src.attrs['names'])
+            for key in src.keys():
+                if key in ('left', 'right'):
+                    group = src[key]
+                    for name in roi_names:
+                        rois.append(ROI.load_hdf(group[name]))
+                else:
+                    rois.append(ROI.load_hdf(src[key]))
         return cls(
             image_name=image_name,
             frame_idx=frame_idx,
@@ -180,17 +187,35 @@ class ROISet:
             rois=tuple(rois)
         )
 
-    def to_hdf(self, path: PathLike, **options):
+    def to_hdf(
+        self,
+        parent: Union[PathLike, _h5.Group],
+        group_key: str = 'rois',
+        write_metadata: bool = True,
+        **options
+    ) -> Union[str, _h5.Group]:
         """`options` can be used to pass to `create_dataset`"""
-        with _h5.File(str(path), 'w') as out:
-            out.attrs['image_name']   = self.image_name
-            out.attrs['frame_idx']    = self.frame_idx
-            out.attrs['total_frames'] = self.total_frames
-
-            rois = out.create_group('rois')
+        if isinstance(parent, (str, Path)):
+            with _h5.File(str(parent), 'w') as out:
+                self.to_hdf(
+                    out,
+                    group_key='',
+                    write_metadata=write_metadata,
+                    **options
+                )
+            return str(parent)
+        else:
+            if write_metadata:
+                for key, val in self.metadata_dict(with_roi_metadata=False).items():
+                    parent.attrs[key] = val
+            if len(group_key) == 0:
+                rois = parent
+            else:
+                rois = parent.create_group(group_key)
             rois.attrs['names']  = _json.dumps(self.names, indent=None)
             for roi in self.rois:
-                roi._write_hdf(out, **options)
+                roi._write_hdf(rois, **options)
+            return rois
     
     def to_matfile(self, path: PathLike):
         metadata = dict()
@@ -206,7 +231,7 @@ class ROISet:
             'rois': data
         })
     
-    def to_file(self, path: PathLike, filetype: ROIFileType):
+    def to_file(self, path: PathLike, filetype: ResultsFileType):
         if filetype == 'hdf':
             self.to_hdf(path)
         elif filetype == 'matlab':
@@ -227,20 +252,25 @@ class ROISet:
                 raise ValueError(f"unexpected hemisphere spec: {repr(roi.side)}")
         return ret
     
-    def metadata_dict(self) -> Dict[str, Any]:
+    def metadata_dict(
+        self,
+        with_roi_metadata: bool = True
+    ) -> Dict[str, Any]:
         ret = {
             'image_name': self.image_name,
+            'total_frames': self.total_frames,
             'frame_idx': self.frame_idx,
             'image_size': self.image_shape,
-            'rois': dict(),
         }
-        for roi in self.rois:
-            if roi.name not in ret['rois']:
-                ret['rois'][roi.name] = {
-                    'name': roi.name,
-                    'AllenID': roi.AllenID,
-                    'description': roi.description
-                }
+        if with_roi_metadata:
+            ret['rois'] = dict()
+            for roi in self.rois:
+                if roi.name not in ret['rois']:
+                    ret['rois'][roi.name] = {
+                        'name': roi.name,
+                        'AllenID': roi.AllenID,
+                        'description': roi.description
+                    }
         return ret
 
 

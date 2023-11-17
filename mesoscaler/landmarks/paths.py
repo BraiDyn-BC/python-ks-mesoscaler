@@ -27,6 +27,9 @@ import os as _os
 from .. import (
     defaults as _defaults,
 )
+from ..typing import (
+    PathLike,
+)
 
 ENV_MESONET_DLC_DIR = 'MESONET_DLC_PROJECT_DIR'
 DLC_CONFIG_FILE_NAME = 'config.yaml'
@@ -43,7 +46,7 @@ def dlc_config_path(project_dir: Optional[Path] = None) -> Path:
     return config
 
 
-def dlc_project_dir(directory: Optional[Path] = None) -> Path:
+def dlc_project_dir(directory: Optional[PathLike] = None) -> Path:
     if directory is None:
         if ENV_MESONET_DLC_DIR not in _os.environ.keys():
             raise KeyError(

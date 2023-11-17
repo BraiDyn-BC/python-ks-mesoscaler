@@ -20,12 +20,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import Optional, Iterable
 from pathlib import Path
-from typing import Union, Iterable, Literal
+import sys as _sys
 
-Number   = Union[int, float]
-PathLike = Union[str, Path]
-Suffixes = Union[str, Iterable[str]]
-Hemisphere = Literal['left', 'right']
-ResultsFileType = Literal['hdf', 'matlab']
-InputImageFiles = Iterable[PathLike]
+def image_paths(image_paths: Iterable[str]) -> Optional[Iterable[Path]]:
+    if len(image_paths) == 0:
+        return _abort('at least one image file must be supplied')
+    image_paths = [Path(path) for path in image_paths]
+    for path in image_paths:
+        if not path.exists():
+            return _abort(f'file not accessible: {str(path)}')
+    return image_paths
+
+
+def input_directory(inputdir: Optional[str] = None) -> Optional[Path]:
+    inputdir = Path(inputdir) if inputdir is not None else Path()
+    if not inputdir.exists():
+        return _abort(f'input directory not accessible: {str(inputdir)}')
+    return inputdir
+
+
+def output_directory(outdir: Optional[str] = None) -> Optional[Path]:
+    outdir = Path(outdir) if outdir is not None else Path()
+    return outdir
+
+
+def output_file_type(file_type: str) -> Optional[str]:
+    if file_type in ('hdf', 'matlab'):
+        return file_type
+    else:
+        return _abort(f"unknown output file type: '{file_type}'")
+
+
+def _abort(msg: str):
+    print(f"***{msg}", file=_sys.stderr, flush=True)
+    print(_sys.argv)

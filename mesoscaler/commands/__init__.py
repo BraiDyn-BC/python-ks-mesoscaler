@@ -19,19 +19,26 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from . import (  # noqa: F401
+    root,
+    process,
+    collection_step,
+    landmark_prediction_step,
+    atlas_alignment_step,
+    roi_generation_step,
+)
 
-IMAGE_SUFFIXES = ('.png', '.tif', '.tiff')
-VIDEO_FRAME_SIZE = (512, 512)
-VIDEO_FRAME_RATE = 1
 
-COLLECTED_IMAGES_VIDEO_NAME = "images.mp4"
-COLLECTED_IMAGES_METADATA_NAME = "metadata.csv"
+parser = root.parser
 
-PREDICTED_LANDMARKS_VIDEO_NAME = "images_with_landmarks.mp4"
-PREDICTED_LANDMARKS_TABLE_NAME = "landmarks.csv"
-LANDMARK_LIKELIHOOD_THRESHOLD  = 0.9999
-ALIGNMENT_TABLE_NAME           = "reference_to_images_transform.csv"
-ALIGNED_LANDMARKS_VIDEO_NAME   = "images_with_aligned_landmarks.mp4"
-ALIGNED_LANDMARKS_TABLE_NAME   = "aligned_landmarks.csv"
 
-PACKAGE_FILE_TYPE = 'hdf'
+def parse(*args):
+    parsed = vars(parser.parse_args(args))
+    fn = vars.pop('func')
+    fn(**parsed)
+
+
+def run():
+    parsed = vars(parser.parse_args())
+    fn = parsed.pop('func')
+    fn(**parsed)

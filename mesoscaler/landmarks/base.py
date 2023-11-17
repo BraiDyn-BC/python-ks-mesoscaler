@@ -23,8 +23,10 @@
 # flake8: noqa: E712
 
 from pathlib import Path
-from typing import Optional, Union, Tuple, Iterable, Dict, Any, Self
+from typing import Optional, Union, Tuple, Iterable, Dict, Any
+from typing_extensions import Self
 import dataclasses as _dataclasses
+import json as _json
 
 import numpy as _np
 import numpy.typing as _npt
@@ -40,6 +42,9 @@ from ..typing import (
     PathLike,
     Number,
     Hemisphere,
+)
+from ..libwrapper import (
+    h5py as _h5,
 )
 from .. import (
     defaults as _defaults,
@@ -251,6 +256,19 @@ class Landmarks:
                 'likelihood': self.coords[idx, 2]
             }
         return ret
+    
+    def to_hdf(
+        self,
+        parent: _h5.Group,
+        key: str ='landmarks',
+        **options
+    ) -> _h5.Group:
+        entry = parent.create_group(key)
+        entry.attrs['names'] = _json.dumps(self.names)
+        entry.create_dataset('x', data=self.x, **options)
+        entry.create_dataset('y', data=self.y, **options)
+        entry.create_dataset('likelihood', data=self.p, **options)
+        return entry
 
 
 @_dataclasses.dataclass
@@ -311,6 +329,20 @@ class Alignment:
             getattr(self, side),
             dsize=_defaults.VIDEO_FRAME_SIZE
         )
+    
+    def to_hdf(
+        self,
+        parent: Union[PathLike, _h5.Group],
+        key: str = 'alignment',
+        **options
+    ) -> Union[_h5.Group, _h5.Dataset]:
+        if self.separate:
+            entry = parent.create_group(key)
+            entry.create_dataset('left', data=self.left, **options)
+            entry.create_dataset('right', data=self.right, **options)
+        else:
+            entry = parent.create_dataset(key, data=self.left, **options)
+        return entry
     
     def to_dict(self) -> Dict[str, float]:
         def update_(
