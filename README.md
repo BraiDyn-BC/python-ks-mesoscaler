@@ -40,3 +40,10 @@ Then register this path `D:\...(omitted)...\config.yaml` as
 ## License
 
 (c) 2023 Keisuke Sehara, the MIT License
+
+Note that the following files belong to:
+
+ (c) 2019 Forys, Xiao, and Murphy lab, CC-BY 4.0
+
+- `mesoscaler/landmarks/reference.py`
+- all the binary files in the `mesoscaler/data` directory.
