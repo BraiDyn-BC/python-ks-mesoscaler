@@ -33,6 +33,7 @@ from . import (
 )
 from .root import commands as _commands
 
+
 def run(
     metadata_dir: Optional[str] = None,
     landmarks_dir: Optional[str] = None,
@@ -52,7 +53,7 @@ def run(
         return
     if (output_file_type is None):
         return
-    
+
     # TODO:
     # check directories (with their contents)
     _procs.run_packaging_all_results(
@@ -63,6 +64,7 @@ def run(
         output_dir=output_dir,
         filetype=output_file_type
     )
+
 
 parser = _commands.add_parser(
     'packaging-step',

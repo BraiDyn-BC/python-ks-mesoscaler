@@ -101,7 +101,7 @@ def package_matfile(
         data[keys.alignment] = results.alignment.left
     data[keys.rois] = results.rois.data_dict()
 
-    outpath = (output_dir / Path(results.name)).with_suffix('.mat')
+    outpath = (output_dir / Path(results.name)).with_suffix('_mesoscaler.mat')
     if not outpath.parent.exists():
         outpath.parent.mkdir(parents=True)
     _sio.savemat(
@@ -116,7 +116,7 @@ def package_hdf(
     **options
 ):
     output_dir = Path(output_dir)
-    outpath = (output_dir / Path(results.name)).with_suffix('.h5')
+    outpath = (output_dir / Path(results.name)).with_suffix('_mesoscaler.h5')
     keys = results.package_keys()
     if not outpath.parent.exists():
         outpath.parent.mkdir(parents=True)

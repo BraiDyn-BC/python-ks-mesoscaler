@@ -48,7 +48,7 @@ def run(
 
 
 parser = _commands.add_parser(
-    'collection-step',
+    'image-collection-step',
     help='(step 1) collects a set of images, and rescales/packs them to be processed.'
 )
 parser.add_argument(

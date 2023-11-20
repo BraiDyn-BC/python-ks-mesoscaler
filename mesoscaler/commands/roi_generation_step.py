@@ -62,7 +62,7 @@ parser = _commands.add_parser(
     help='(step 4) generate roi masks for the images based on the aligned reference atlas.'
 )
 parser.add_argument(
-    '-m',
+    '-M',
     '--metadata-directory',
     dest='metadir',
     metavar='METADATA-DIRECTORY',

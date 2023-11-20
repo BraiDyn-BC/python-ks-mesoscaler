@@ -82,7 +82,7 @@ def run_landmark_prediction(
 ) -> Path:
     """uses the collected images video from ``input_dir``, and predict landmarks
     using the DeepLabCut network.
-    
+
     writes the labeled video and the prediction results into ``output_dir``.
     """
     input_dir = Path(input_dir)
@@ -112,7 +112,7 @@ def run_landmark_alignment(
     """loads the results of DeepLabCut inference from ``input_dir``, and
     estimate Affine warp matrix (matrices) for warping reference landmarks
     onto the actual data images.
-    
+
     Writes out the results to ``output_dir``.
     """
     input_dir = Path(input_dir)
@@ -175,7 +175,7 @@ def run_rois_generation(
             digits = _fileutils.required_number_of_digits(roiset.total_frames)
             outbase = f"{Path(roiset.image_name).stem}_frame{str(roiset.frame_idx).zfill(digits)}"
         suffix = _fileutils.get_roi_file_suffix(file_type)
-        outfile = output_dir / f"{outbase}{suffix}"
+        outfile = output_dir / f"{outbase}_rois{suffix}"
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
         roiset.to_file(outfile, file_type)
@@ -241,7 +241,7 @@ def run_packaging_all_results(
         else:
             digits = _fileutils.required_number_of_digits(row.TotalFrames)
             roibase = f"{name}_frame{str(row.Frame).zfill(digits)}"
-        return name, (rois_dir / f"{roibase}.h5")
+        return name, (rois_dir / f"{roibase}_rois.h5")
 
     for idx, row in metadata.iterrows():
         basename, roifile = _get_roifile(row)

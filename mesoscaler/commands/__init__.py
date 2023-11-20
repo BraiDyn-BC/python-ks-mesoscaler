@@ -22,7 +22,7 @@
 from . import (  # noqa: F401
     root,
     process,
-    collection_step,
+    image_collection_step,
     landmark_prediction_step,
     atlas_alignment_step,
     roi_generation_step,
