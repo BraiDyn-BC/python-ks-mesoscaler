@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2023 Keisuke Sehara
+# Copyright (c) 2023-2024 Keisuke Sehara
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ from . import (  # noqa: F401
     landmark_prediction_step,
     atlas_alignment_step,
     roi_generation_step,
+    packaging_step,
 )
 
 

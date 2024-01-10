@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2023 Keisuke Sehara
+# Copyright (c) 2023-2024 Keisuke Sehara
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -101,7 +101,8 @@ def package_matfile(
         data[keys.alignment] = results.alignment.left
     data[keys.rois] = results.rois.data_dict()
 
-    outpath = (output_dir / Path(results.name)).with_suffix('_mesoscaler.mat')
+    name    = Path(results.name).stem
+    outpath = (output_dir / f"{name}_mesoscaler.mat")
     if not outpath.parent.exists():
         outpath.parent.mkdir(parents=True)
     _sio.savemat(
@@ -116,7 +117,8 @@ def package_hdf(
     **options
 ):
     output_dir = Path(output_dir)
-    outpath = (output_dir / Path(results.name)).with_suffix('_mesoscaler.h5')
+    name    = Path(results.name).stem
+    outpath = (output_dir / f"{name}_mesoscaler.h5")
     keys = results.package_keys()
     if not outpath.parent.exists():
         outpath.parent.mkdir(parents=True)

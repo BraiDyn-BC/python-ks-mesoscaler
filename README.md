@@ -28,7 +28,7 @@ in case you already have the original MesoNet up and running).
 2. Navigate in the "Files" pane: `MesoNet/OSF Storage/6_Landmark_estimation_model`
 3. Follow the link at: `atlas-DongshengXiao-2020-08-03.zip`
 4. In the opened link, you will find the file name (`atlas-DongshengXiao-2020-08-03.zip`)
-   as the headline. Locate the tri-colon ' &#205D; ' button, and click it.
+   as the headline. Locate the tri-colon \[ &#x205D; \] button, and click it.
 5. Click the 'Download' menu, and wait until downloading is done.
 6. Extract the contents of the ZIP file, and locate it wherever permanent.
 
@@ -37,8 +37,8 @@ child (not as the child of any child directories). Make sure it is the case.
 
 ## Installation
 
-[!NOTE]
-We recommend setting up DeepLabCut beforehand for your environment
+> [!NOTE]
+> We recommend setting up DeepLabCut beforehand for your environment
 
 Currently, only installing from this repository is supported:
 
@@ -48,12 +48,13 @@ cd python-ks-mesoscaler
 pip install .  # add the `-e` switch in case you plan to modify the code
 ```
 
-[!CAUTION]
-In some cases, `pip` may refuse to install the executable to the non-user
-environments (and recommends to add `--user`), or compalains that the installation
-path is not included as `PATH`.
-Try running your terminal emulator (e.g. Anaconda Prompt) in the admin mode
-in these cases.
+> [!CAUTION]
+> In some cases, `pip` may refuse to install the executable to the non-user
+> environments (and recommends to add `--user`), or compalains that the installation
+> path is not included as `PATH`.
+>
+> Try running your terminal emulator (e.g. Anaconda Prompt) in the admin mode
+> in such cases.
 
 At this point, also specify the `MESONET_DLC_PROJECT_DIR`
 environment variable so that the library can find the path to your
@@ -72,7 +73,7 @@ See our [HOWTO page](./HOWTO.md).
 
 ### Most source code and documentation
 
-(c) 2023 Keisuke Sehara, the MIT License
+(c) 2023-2024 Keisuke Sehara, the MIT License
 
 The DOI for reference will be obtained soon.
 
