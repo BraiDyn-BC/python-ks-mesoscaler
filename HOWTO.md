@@ -2,8 +2,9 @@
 
 1. [One-liner command](#1-one-liner-command)
 2. [Step-by-step command-line processing](#2-step-by-step-command-line-processing)
-3. [Python internals](#3-python-internals)
-4. [Miscellaneous](#4-miscellaneous)
+3. [Running step-by-step from Python](#3-running-step-by-step-from-python)
+4. [Python internals](#4-python-internals)
+5. [Miscellaneous](#5-miscellaneous)
 
 
 ![mesoscaler workflow](./resources/workflow.png)
@@ -73,7 +74,22 @@ mesoscaler packaging-step -L landmarks -A alignment -R rois -o results collected
 
 > **NOTE**: similar to the `mesoscaler process` subcommand, you may find some useful options by calling `mesoscaler <subcommand> --help`.
 
-## 3. Python internals
+## 3. Running step-by-step from Python
+
+`mesoscaler` exposes the interfaces to each of the [subcommands above](#2-step-by-step-command-line-processing)
+as the `mesoscaler.commands` submodule:
+
+| Subcommands | Corresponding calls in Python |
+|------------|------------------------------|
+|`mesoscaler process` | `mesoscaler.commands.process.run()` |
+|`mesoscaler image-collection-step` | `mesoscaler.commands.image_collection_step.run()` |
+|`mesoscaler landmark-prediction-step` | `mesoscaler.commands.landmark_prediction_step.run()` |
+|`mesoscaler atlas-alignment-step` | `mesoscaler.commands.atlas_alignment_step.run()` |
+|`mesoscaler roi-generation-step` | `mesoscaler.commands.roi_generation_step.run()` |
+|`mesoscaler packaging-step` | `mesoscaler.commands.packaging_step.run()` |
+
+
+## 4. Python internals
 
 Several Python classes help running each of the [above steps](#2-step-by-step-command-line-processing)
 (also refer to the image [above](#mesoscaler-usage)):
@@ -114,7 +130,10 @@ Several Python classes help running each of the [above steps](#2-step-by-step-co
    `Landmarks`, `Alignment` and `ROISet` objects for each source image.
    This object manages the storage to a `.mat` or to a `.h5` file.
 
-## 4. Miscellaneous
+In case you want to handle these internal classes directly,
+the best place to start would be the procedures defined in [`procs.py`](./mesoscaler/procs.py).
+
+## 5. Miscellaneous
 
 - At the time of writing this, `mesoscaler` does not generate information about the borders of the ROIs. 
   You will need a way by using such as `scipy.ndimage.find_objects` (in Python)
