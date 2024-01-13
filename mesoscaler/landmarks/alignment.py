@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2023 Keisuke Sehara
+# Copyright (c) 2023-2024 Keisuke Sehara
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,7 @@ def align_dlc_landmarks(
     target: Union[_base.DLCOutput, _base.Landmarks, Iterable[_base.Landmarks]],
     reference: Optional[_base.Landmarks],
     likelihood_threshold: Optional[Number] = None,
+    min_valid_points: Optional[int] = None,
     separate_sides: Optional[bool] = False
 ) -> Tuple[_base.Alignment]:
     """takes `Landmark` objects, and try to estimate the Affine warp matrix
@@ -115,7 +116,8 @@ def align_dlc_landmarks(
             validate_landmarks(
                 single,
                 reference,
-                likelihood_threshold=likelihood_threshold
+                likelihood_threshold=likelihood_threshold,
+                min_valid_points=min_valid_points
             ),
             separate_sides=separate_sides
         ) for single in target
@@ -125,7 +127,8 @@ def align_dlc_landmarks(
 def validate_landmarks(
     target: _base.Landmarks,
     reference: _base.Landmarks,
-    likelihood_threshold: Optional[Number] = None
+    likelihood_threshold: Optional[Number] = None,
+    min_valid_points: Optional[int] = None,
 ) -> Pairing:
     """cherry-picks only the 'valid' landmarks out of `target` and `reference`
     `Landmarks` object, using the `likelihood_threhold` criterion.
@@ -135,12 +138,16 @@ def validate_landmarks(
     """
     if likelihood_threshold is None:
         likelihood_threshold = _defaults.LANDMARK_LIKELIHOOD_THRESHOLD
+    if min_valid_points is None:
+        min_valid_points = _defaults.MIN_VALID_POINTS_ALIGNED
     valid_targets = []
     valid_refs = []
     for tg, ref in zip(target, reference):
         if tg.p > likelihood_threshold:
             valid_targets.append(tg)
             valid_refs.append(ref)
+    if len(valid_targets) < min_valid_points:
+        raise ValueError(f"{len(valid_targets)}/{len(target)} points above threshold={likelihood_threshold:.4f} (at least {min_valid_points} needed)")
     return Pairing(
         target=_base.Landmarks.from_single_landmarks(valid_targets),
         reference=_base.Landmarks.from_single_landmarks(valid_refs)

@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2023 Keisuke Sehara
+# Copyright (c) 2023-2024 Keisuke Sehara
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@ COLLECTED_IMAGES_METADATA_NAME = "metadata.csv"
 
 PREDICTED_LANDMARKS_VIDEO_NAME = "images_with_landmarks.mp4"
 PREDICTED_LANDMARKS_TABLE_NAME = "landmarks.csv"
-LANDMARK_LIKELIHOOD_THRESHOLD  = 0.9999
+LANDMARK_LIKELIHOOD_THRESHOLD  = 0.85
+MIN_VALID_POINTS_ALIGNED       = 3
 ALIGNMENT_TABLE_NAME           = "reference_to_images_transform.csv"
 ALIGNED_LANDMARKS_VIDEO_NAME   = "images_with_aligned_landmarks.mp4"
 ALIGNED_LANDMARKS_TABLE_NAME   = "aligned_landmarks.csv"

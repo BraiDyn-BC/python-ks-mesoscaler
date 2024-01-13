@@ -43,6 +43,7 @@ def run(
     output_file_type: ResultsFileType = 'hdf',
     dlc_project_dir: Optional[str] = None,
     threshold: Optional[float] = None,
+    min_valid_points: Optional[int] = None,  # TODO: this may be configurable
     separate_sides: Optional[bool] = False,  # this value is intentionally made un-configurable
     video_fps: Optional[float] = None,
     rois_file_type: ResultsFileType = 'hdf',  # this value is intentionally made un-configurable
@@ -78,6 +79,7 @@ def run(
             landmarks_dir,
             landmarks_dir,
             likelihood_threshold=threshold,
+            min_valid_points=min_valid_points,
             separate_sides=separate_sides,
             video_fps=video_fps,
         )

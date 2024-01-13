@@ -35,6 +35,7 @@ def run(
     input_directory: Optional[str] = None,
     outdir: Optional[str] = None,
     threshold: Optional[float] = None,
+    min_valid_points: Optional[int] = None, # TODO: this may be configurable
     separate_sides: Optional[bool] = False,  # this value is intentionally made un-configurable
     video_fps: Optional[float] = None,
 ):
@@ -49,6 +50,7 @@ def run(
         indir,
         outdir,
         likelihood_threshold=threshold,
+        min_valid_points=min_valid_points,
         separate_sides=separate_sides,
         video_fps=video_fps,
     )

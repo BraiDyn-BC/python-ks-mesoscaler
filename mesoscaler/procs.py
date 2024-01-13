@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2023 Keisuke Sehara
+# Copyright (c) 2023-2024 Keisuke Sehara
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -106,6 +106,7 @@ def run_landmark_alignment(
     input_dir: PathLike,
     output_dir: PathLike,
     likelihood_threshold: Optional[float] = None,
+    min_valid_points: Optional[int] = None,
     separate_sides: Optional[bool] = None,
     video_fps: Optional[Number] = None
 ) -> Path:
@@ -124,6 +125,7 @@ def run_landmark_alignment(
         landmarks,
         reference,
         likelihood_threshold=likelihood_threshold,
+        min_valid_points=min_valid_points,
         separate_sides=separate_sides
     )
     alignment_table_path = _landmarks.alignment_table_path(output_dir)
