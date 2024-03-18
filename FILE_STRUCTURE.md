@@ -3,6 +3,11 @@
 The HDF output (`*_mesoscaler.h5`) will have the following structure
 (the MATLAB output should have the similar structure).
 
+- [`/images512` group](#images512-group)
+- [`/landmarks512` group](#landmarks512-group)
+- [`/affine_ref_to_data512` dataset](#affine_ref_to_data512-dataset)
+- [`/rois` group](#rois-group)
+
 ## `/images512` group
 
 Annotated images for humans to validate the state of atlas registration.
