@@ -69,6 +69,8 @@ Then register the path `D:\library\atlas-DongshengXiao-2020-08-03` as
 
 See our [HOWTO page](./HOWTO.md).
 
+For the resulting file structure, refer to the [file structure page](./FILE_STRUCTURE.md).
+
 ## License
 
 ### Most source code and documentation

@@ -23,7 +23,9 @@ This ends up processing all of the image files you pass as
 `img1_mesoscaler.h5`, `img2_mesoscaler.h5`, and so on,
 in the HDF5 format.
 
-Each of the HDF files should contain the following data:
+For the detailed file structure, refer to the [file structure page](./FILE_STRUCTURE.md).
+
+Briefly, each of the HDF files should contain the following data:
 
 - **images** rescaled in 512 x 512 px size:
   - the original (source) image
