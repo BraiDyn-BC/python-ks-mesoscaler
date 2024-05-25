@@ -19,7 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+from importlib import reload as _reload  # DEBUG
+
 from . import (  # noqa: F401
+    validate,
     root,
     process,
     image_collection_step,
@@ -28,6 +32,16 @@ from . import (  # noqa: F401
     roi_generation_step,
     packaging_step,
 )
+
+# DEBUG
+_reload(validate)
+_reload(root)
+_reload(image_collection_step)
+_reload(landmark_prediction_step)
+_reload(atlas_alignment_step)
+_reload(roi_generation_step)
+_reload(packaging_step)
+_reload(process)
 
 
 parser = root.parser

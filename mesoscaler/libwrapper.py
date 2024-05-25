@@ -24,4 +24,4 @@ import warnings as _warnings
 
 with _warnings.catch_warnings():
     _warnings.simplefilter('ignore', category=UserWarning)
-    import h5py
+    import h5py  # noqa: F401

@@ -20,17 +20,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from importlib import reload as _reload  # DEBUG
+
 from . import (  # noqa: F401
+    defaults,
+    typing,
+    fileutils,
     images,
     landmarks,
     atlas,
     procs,
     rois,
     packaging,
-    defaults,
-    typing,
     commands,
 )
+
+# DEBUG
+_reload(defaults)
+_reload(typing)
+_reload(fileutils)
+_reload(images)
+_reload(landmarks)
+_reload(atlas)
+_reload(procs)
+_reload(rois)
+_reload(packaging)
+_reload(commands)
 
 # image-related classes and procedures
 InputImageFiles = images.InputImageFiles

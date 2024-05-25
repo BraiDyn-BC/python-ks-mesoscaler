@@ -20,13 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from importlib import reload as _reload  # DEBUG
+
 from . import (  # noqa: F401
+    affine,
     base,
     paths,
     reference,
     prediction,
     alignment,
 )
+
+# DEBUG
+_reload(affine)
+_reload(base)
+_reload(paths)
+_reload(reference)
+_reload(prediction)
+_reload(alignment)
+
 
 DLCOutput = base.DLCOutput
 Landmarks = base.Landmarks

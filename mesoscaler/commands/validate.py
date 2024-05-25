@@ -24,10 +24,11 @@ from typing import Optional, Iterable
 from pathlib import Path
 import sys as _sys
 
+
 def image_paths(image_paths: Iterable[str]) -> Optional[Iterable[Path]]:
+    image_paths = [Path(path) for path in image_paths]
     if len(image_paths) == 0:
         return _abort('at least one image file must be supplied')
-    image_paths = [Path(path) for path in image_paths]
     for path in image_paths:
         if not path.exists():
             return _abort(f'file not accessible: {str(path)}')
