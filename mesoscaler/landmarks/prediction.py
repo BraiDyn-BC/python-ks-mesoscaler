@@ -67,7 +67,9 @@ def predict_dlc_landmarks(
         _dlc.analyze_videos(
             str(configpath),
             [sourcepath],
-            videotype='.mp4'
+            videotype='.mp4',
+            gputouse=None,
+            TFGPUinference=False,
         )
         _os.chdir(str(_cwd))  # NOTE: just in case DLC calls `chdir`
         _dlc.create_labeled_video(
